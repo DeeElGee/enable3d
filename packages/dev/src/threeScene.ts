@@ -4,42 +4,26 @@ import { SpotLight, SpotLightHelper, PointLight, DirectionalLight } from '../../
 const isTouchDevice = 'ontouchstart' in window
 
 class MainScene extends Scene3D {
+  async preload() {
+    await this.load.preload('robot', '/assets/Idle.fbx')
+    await this.load.preload('grass', '/assets/grass.jpg')
+  }
+
   async create() {
     this.warpSpeed()
-    this.camera.position.set(2, 2, 4)
 
-    this.load.gltf('/assets/box_man.glb').then(gltf => {
-      const child = gltf.scene.children[0]
+    const grass = await this.load.texture('grass')
+    this.add.box({}, { phong: { map: grass, transparent: true } })
 
-      const boxMan = new ExtendedObject3D()
-      boxMan.add(child)
-      this.scene.add(boxMan)
+    const robot1 = await this.load.fbx('robot')
+    robot1.scale.set(0.05, 0.05, 0.05)
+    robot1.position.set(5, 0, 0)
+    this.add.existing(robot1)
 
-      let i = 0
-      let anims = ['run', 'sprint', 'idle', 'driving', 'falling']
-
-      // ad the box man's animation mixer to the animationMixers array (for auto updates)
-      this.animationMixers.add(boxMan.animation.mixer)
-
-      gltf.animations.forEach(animation => {
-        if (animation.name) {
-          // add a new animation to the box man
-          boxMan.animation.add(animation.name, animation)
-        }
-      })
-
-      // play the run animation
-      // boxMan.animation.play('run')
-      // old
-      boxMan.setAction('idle')
-
-      setInterval(() => {
-        i++
-        // play the run animation
-        boxMan.animation.play(anims[i % 5], 500)
-        console.log('current animation', boxMan.animation.current)
-      }, 2500)
-    })
+    const robot2 = await this.load.fbx('robot')
+    robot2.scale.set(0.05, 0.05, 0.05)
+    robot2.position.set(-5, 0, 0)
+    this.add.existing(robot2)
   }
 }
 
