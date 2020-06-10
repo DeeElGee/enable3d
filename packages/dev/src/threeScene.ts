@@ -42,16 +42,16 @@ class MainScene extends Scene3D {
     this.physics.add.existing(box, { collisionFlags: 2 })
 
     box.body.on.collision((otherObject, event) => {
-      // console.log(otherObject.name, event.impacts[0]?.normal)
+      // console.log(otherObject.name, event)
     })
 
     this.box0.body.on.collision((otherObject, event) => {
-      // console.log(otherObject.name, event.impacts[0]?.normal)
+      // console.log(otherObject.name, event)
     })
 
     // @ts-ignore
     this.physics.add.collider(box, this.box0, (event: any) => {
-      // console.log('boxes collide: ', event)
+      console.log('boxes collide: ', event)
     })
   }
 }

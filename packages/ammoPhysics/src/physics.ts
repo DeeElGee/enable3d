@@ -332,8 +332,7 @@ class AmmoPhysics extends EventEmitter {
       let contact = false
       let maxImpulse = 0
 
-      const collisionImpacts: Types.CollisionImpact[] = []
-      let collisionType: Types.CollisionType = 'start'
+      let event: Types.CollisionEvent = 'start'
 
       for (let j = 0, jl = contactManifold.getNumContacts(); j < jl; j++) {
         const contactPoint = contactManifold.getContactPoint(j)
@@ -343,7 +342,6 @@ class AmmoPhysics extends EventEmitter {
         if (contactPoint.getDistance() <= 0) {
           contact = true
           const impulse = contactPoint.getAppliedImpulse()
-
           const impactPoint = contactPoint.get_m_positionWorldOnB()
           const impactNormal = contactPoint.get_m_normalWorldOnB()
 
@@ -352,24 +350,10 @@ class AmmoPhysics extends EventEmitter {
             const names = [threeObject0.name, threeObject1.name].sort()
             const combinedName = `${names[0]}__${names[1]}`
 
-            const impact: Types.CollisionImpact = {
-              point: { x: impactPoint.x(), y: impactPoint.y(), z: impactPoint.z() },
-              normal: { x: impactNormal.x(), y: impactNormal.y(), z: impactNormal.z() }
-            }
-
-            if (this.earlierDetectedCollisions.find(el => el.combinedName === combinedName)) collisionType = 'collision'
+            if (this.earlierDetectedCollisions.find(el => el.combinedName === combinedName)) event = 'collision'
 
             if (!detectedCollisions.find(el => el.combinedName === combinedName)) {
               detectedCollisions.push({ combinedName, collision: true })
-            }
-
-            collisionImpacts.push(impact)
-
-            if (j === jl - 1) {
-              const event: Types.CollisionEvent = {
-                type: collisionType,
-                impacts: collisionImpacts
-              }
               this.collisionEvents.emit('collision', { bodies: [threeObject0, threeObject1], event })
             }
           }
@@ -384,7 +368,7 @@ class AmmoPhysics extends EventEmitter {
             }
           }
 
-          // break
+          break
         }
       }
 
@@ -471,7 +455,7 @@ class AmmoPhysics extends EventEmitter {
         const split = combinedName.split('__')
         const obj0 = this.rigidBodies.find(obj => obj.name === split[0])
         const obj1 = this.rigidBodies.find(obj => obj.name === split[1])
-        const event: Types.CollisionEvent = { type: 'end', impacts: [] }
+        const event = 'end'
         if (obj0 && obj1) this.collisionEvents.emit('collision', { bodies: [obj0, obj1], event })
       }
     })
