@@ -4,41 +4,54 @@ import { SpotLight, SpotLightHelper, PointLight, DirectionalLight } from '../../
 const isTouchDevice = 'ontouchstart' in window
 
 class MainScene extends Scene3D {
+  box0: ExtendedObject3D
+
+  update(time: number) {
+    if (this.box0 && this.box0.body) {
+      this.box0.rotation.y += Math.sin(time) / 50
+      this.box0.body.needUpdate = true
+    }
+  }
+
   async create() {
-    this.warpSpeed()
+    const { ground } = await this.warpSpeed()
     this.camera.position.set(2, 2, 4)
 
-    this.load.gltf('/assets/box_man.glb').then(gltf => {
-      const child = gltf.scene.children[0]
+    this.physics.debug?.enable()
+    this.physics.debug?.mode(0xffffff)
 
-      const boxMan = new ExtendedObject3D()
-      boxMan.add(child)
-      this.scene.add(boxMan)
+    this.box0 = this.add.box({
+      height: 0.2,
+      width: 0.2,
+      name: 'theBox0',
+      y: 1,
+      x: 0.75,
+      z: -0.25
+    })
+    this.box0.rotateY(-Math.PI / 4)
+    this.physics.add.existing(this.box0, { collisionFlags: 6 })
 
-      let i = 0
-      let anims = ['run', 'sprint', 'idle', 'driving', 'falling']
+    const box = this.add.box({
+      height: 0.2,
+      width: 0.2,
+      name: 'theBox1',
+      y: 1,
+      x: 0
+    })
+    box.rotateY(-0.5)
+    this.physics.add.existing(box, { collisionFlags: 2 })
 
-      // ad the box man's animation mixer to the animationMixers array (for auto updates)
-      this.animationMixers.add(boxMan.animation.mixer)
+    box.body.on.collision((otherObject, event) => {
+      // console.log(otherObject.name, event.impacts[0]?.normal)
+    })
 
-      gltf.animations.forEach(animation => {
-        if (animation.name) {
-          // add a new animation to the box man
-          boxMan.animation.add(animation.name, animation)
-        }
-      })
+    this.box0.body.on.collision((otherObject, event) => {
+      // console.log(otherObject.name, event.impacts[0]?.normal)
+    })
 
-      // play the run animation
-      // boxMan.animation.play('run')
-      // old
-      boxMan.setAction('idle')
-
-      setInterval(() => {
-        i++
-        // play the run animation
-        boxMan.animation.play(anims[i % 5], 500)
-        console.log('current animation', boxMan.animation.current)
-      }, 2500)
+    // @ts-ignore
+    this.physics.add.collider(box, this.box0, (event: any) => {
+      // console.log('boxes collide: ', event)
     })
   }
 }

@@ -231,8 +231,14 @@ export interface AddExistingConfig extends XYZ {
   addChildren?: boolean
 }
 
+export type CollisionType = 'start' | 'collision' | 'end'
+
+export interface CollisionImpact {
+  point?: XYZ
+  normal?: XYZ
+}
+
 export interface CollisionEvent {
-  name: 'start' | 'collision' | 'end'
-  impactPoint?: XYZ
-  impactNormal?: XYZ
+  type: CollisionType
+  impacts: CollisionImpact[]
 }
